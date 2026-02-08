@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:local_auth/local_auth.dart';
+import 'attendance_marked_screen.dart';
 
 class WifiScannerScreen extends StatefulWidget {
   const WifiScannerScreen({Key? key}) : super(key: key);
@@ -19,6 +21,91 @@ class _WifiScannerScreenState extends State<WifiScannerScreen> {
   void initState() {
     super.initState();
     _startScan();
+  }
+
+  // Check for target SSID and show fingerprint dialog if found
+  Future<void> _checkForTargetSSID(List<WiFiAccessPoint> accessPoints) async {
+    final targetSSID = 'Airtel_SHAS_2731';
+    final hasTargetSSID = accessPoints.any((ap) => ap.ssid == targetSSID);
+    
+    if (!mounted) return;
+    
+    if (hasTargetSSID) {
+      final localAuth = LocalAuthentication();
+      try {
+        // First check if biometric authentication is available
+        final canAuthenticate = await localAuth.canCheckBiometrics || 
+                               await localAuth.isDeviceSupported();
+        
+        if (!canAuthenticate) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Biometric authentication is not available on this device'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+          return;
+        }
+
+        // List available biometrics (for debugging)
+        final availableBiometrics = await localAuth.getAvailableBiometrics();
+        print('Available biometrics: $availableBiometrics');
+
+        // Try to authenticate
+        final didAuthenticate = await localAuth.authenticate(
+          localizedReason: 'Authenticate to mark your attendance',
+          options: const AuthenticationOptions(
+            stickyAuth: true,
+            biometricOnly: true,
+            useErrorDialogs: true,
+          ),
+        );
+        
+        if (didAuthenticate && mounted) {
+          if (mounted) {
+            // Give some visual feedback before navigation
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Authentication successful!'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 1),
+              ),
+            );
+            
+            // Add a small delay for better UX
+            await Future.delayed(const Duration(milliseconds: 500));
+            
+            // Navigate to attendance marked screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AttendanceMarkedScreen(),
+              ),
+            );
+          }
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Authentication was not completed'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Authentication error: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Authentication error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _startScan() async {
@@ -80,6 +167,9 @@ class _WifiScannerScreenState extends State<WifiScannerScreen> {
         accessPoints = results;
         _isLoading = false;
       });
+      
+      // Check for target SSID after scan
+      _checkForTargetSSID(results);
     } catch (e) {
       setState(() {
         _errorMessage = 'Error scanning for WiFi: $e';

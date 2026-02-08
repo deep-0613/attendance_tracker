@@ -39,6 +39,7 @@ dependencies:
   wifi_scan: ^0.4.1
   permission_handler: ^11.3.1
   geolocator: ^11.0.1
+  local_auth: ^2.2.0
 
 dev_dependencies:
   flutter_test:
