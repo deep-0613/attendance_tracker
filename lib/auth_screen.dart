@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'main_screen.dart';
-import '../faculty/faculty_home_screen.dart';
+import 'student/main_screen.dart';
+import 'faculty/faculty_home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
