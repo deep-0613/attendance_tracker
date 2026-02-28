@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StudentProfileScreen extends StatelessWidget {
-  const StudentProfileScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic>? studentData;
+  
+  const StudentProfileScreen({Key? key, this.studentData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +63,7 @@ class StudentProfileScreen extends StatelessWidget {
                   
                   // Name
                   Text(
-                    "Parth Salunke",
+                    studentData?['name'] ?? "Parth Salunke",
                     style: GoogleFonts.inter(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -88,7 +91,7 @@ class StudentProfileScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      "Computer Engineering",
+                      studentData?['department'] ?? "Computer Engineering",
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: const Color(0xFFA50C22),
@@ -104,20 +107,20 @@ class StudentProfileScreen extends StatelessWidget {
             
             // Personal Information Section
             _buildSectionCard("Personal Information", [
-              _buildInfoRow(Icons.email_outlined, "Email", "parth.salunke@somaiya.edu"),
-              _buildInfoRow(Icons.phone_outlined, "Phone", "+91 98765 43210"),
-              _buildInfoRow(Icons.calendar_today_outlined, "Date of Birth", "15/08/2003"),
-              _buildInfoRow(Icons.location_on_outlined, "Address", "Mumbai, Maharashtra"),
+              _buildInfoRow(Icons.email_outlined, "Email", studentData?['email'] ?? "parth.salunke@somaiya.edu"),
+              _buildInfoRow(Icons.phone_outlined, "Phone", studentData?['phone'] ?? "+91 98765 43210"),
+              _buildInfoRow(Icons.calendar_today_outlined, "Date of Birth", studentData?['dateOfBirth'] ?? "15/08/2003"),
+              _buildInfoRow(Icons.location_on_outlined, "Address", studentData?['address'] ?? "Mumbai, Maharashtra"),
             ]),
             
             const SizedBox(height: 16),
             
             // Academic Information Section
             _buildSectionCard("Academic Information", [
-              _buildInfoRow(Icons.school_outlined, "Year", "Third Year"),
-              _buildInfoRow(Icons.class_outlined, "Division", "A"),
-              _buildInfoRow(Icons.numbers_outlined, "Roll Number", "23"),
-              _buildInfoRow(Icons.grade_outlined, "SGPA", "8.5"),
+              _buildInfoRow(Icons.school_outlined, "Year", studentData?['year'] ?? "Third Year"),
+              _buildInfoRow(Icons.class_outlined, "Division", studentData?['division'] ?? "A"),
+              _buildInfoRow(Icons.numbers_outlined, "Roll Number", studentData?['rollNumber'] ?? "23"),
+              _buildInfoRow(Icons.grade_outlined, "SGPA", studentData?['sgpa'] ?? "8.5"),
             ]),
             
             const SizedBox(height: 16),
@@ -261,7 +264,7 @@ class StudentProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -292,8 +295,14 @@ class StudentProfileScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
+                
+                // Clear shared preferences
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+                
+                // Navigate to auth screen
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/',
                   (Route<dynamic> route) => false,

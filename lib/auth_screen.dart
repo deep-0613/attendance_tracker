@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'student/main_screen.dart';
 import 'faculty/faculty_home_screen.dart';
@@ -16,73 +19,126 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _isFacultyLogin = false;
+  
+  Map<String, dynamic> studentData = {};
+  Map<String, dynamic> facultyData = {};
 
   @override
-  void dispose() {
-    _idController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadData();
   }
 
-  void _login() {
+  Future<void> _loadData() async {
+    try {
+      // Load student data
+      final studentJson = await rootBundle.loadString('assets/json/students.json');
+      final studentMap = json.decode(studentJson);
+      
+      // Load faculty data
+      final facultyJson = await rootBundle.loadString('assets/json/faculty.json');
+      final facultyMap = json.decode(facultyJson);
+      
+      setState(() {
+        studentData = studentMap;
+        facultyData = facultyMap;
+      });
+      
+      // Check login status after data is loaded
+      _checkLoginStatus();
+    } catch (e) {
+      print('Error loading data: $e');
+    }
+  }
+
+  Future<void> _checkLoginStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      final userType = prefs.getString('userType') ?? '';
+      final userId = prefs.getString('userId') ?? '';
+      
+      if (isLoggedIn && userId.isNotEmpty) {
+        // Load user data
+        Map<String, dynamic>? userData;
+        if (userType == 'student' && studentData.containsKey(userId)) {
+          userData = studentData[userId];
+        } else if (userType == 'faculty' && facultyData.containsKey(userId)) {
+          userData = facultyData[userId];
+        }
+        
+        if (userData != null) {
+          if (userType == 'faculty') {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const FacultyHomeScreen()),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => MainScreen(studentData: userData)),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      print('Error checking login status: $e');
+    }
+  }
+
+  Future<void> _login() async {
     setState(() => _isLoading = true);
 
-    // Test credentials
-    const studentCredentials = {
-      'FCUG23762': 'password123',
-      'FCUG23749': 'pass123',
-      'FCUG23702': 'student123',
-    };
-
-    const facultyCredentials = {
-      'FAC001': 'faculty123',
-      'Manjiri': 'teacher123',
-    };
-
     // Simulate authentication delay
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() => _isLoading = false);
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() => _isLoading = false);
 
-      final id = _idController.text.trim();
-      final password = _passwordController.text.trim();
+    final id = _idController.text.trim();
+    final password = _passwordController.text.trim();
 
-      bool isAuthenticated = false;
+    bool isAuthenticated = false;
+    Map<String, dynamic>? userData;
 
-      if (_isFacultyLogin) {
-        isAuthenticated =
-            facultyCredentials.containsKey(id) &&
-            facultyCredentials[id] == password;
-      } else {
-        isAuthenticated =
-            studentCredentials.containsKey(id) &&
-            studentCredentials[id] == password;
+    if (_isFacultyLogin) {
+      if (facultyData.containsKey(id) && facultyData[id]['password'] == password) {
+        isAuthenticated = true;
+        userData = facultyData[id];
       }
+    } else {
+      if (studentData.containsKey(id) && studentData[id]['password'] == password) {
+        isAuthenticated = true;
+        userData = studentData[id];
+      }
+    }
 
-      if (isAuthenticated) {
-        if (_isFacultyLogin) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const FacultyHomeScreen()),
-          );
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainScreen()),
-          );
-        }
+    if (isAuthenticated && userData != null) {
+      // Save login state to shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userType', _isFacultyLogin ? 'faculty' : 'student');
+      await prefs.setString('userId', id);
+      
+      if (_isFacultyLogin) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const FacultyHomeScreen()),
+        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isFacultyLogin
-                  ? "Invalid faculty credentials."
-                  : "Invalid student credentials.",
-              style: GoogleFonts.inter(),
-            ),
-            backgroundColor: const Color(0xFFA50C22),
-            duration: const Duration(seconds: 4),
-          ),
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => MainScreen(studentData: userData)),
         );
       }
-    });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isFacultyLogin
+                ? "Invalid faculty credentials."
+                : "Invalid student credentials.",
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: const Color(0xFFA50C22),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 
   @override

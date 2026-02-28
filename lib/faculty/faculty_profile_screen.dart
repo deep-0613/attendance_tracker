@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FacultyProfileScreen extends StatelessWidget {
-  const FacultyProfileScreen({super.key});
+  final Map<String, dynamic>? facultyData;
+  
+  const FacultyProfileScreen({super.key, this.facultyData});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +62,7 @@ class FacultyProfileScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Manjiri Samant",
+                            facultyData?['name'] ?? "Manjiri Samant",
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
@@ -68,7 +71,7 @@ class FacultyProfileScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "FAC001 | Computer Engineering",
+                            "${facultyData?['email'] ?? "manjiris@somaiya.edu"} | ${facultyData?['department'] ?? "Computer Engineering"}",
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               color: const Color(0xFF6B7280),
@@ -138,22 +141,22 @@ class FacultyProfileScreen extends StatelessWidget {
                     _buildProfileInfoRow(
                       Icons.email_outlined,
                       "Email",
-                      "manjiris@somaiya.edu",
+                      facultyData?['email'] ?? "manjiris@somaiya.edu",
                     ),
                     _buildProfileInfoRow(
                       Icons.phone_outlined,
                       "Phone",
-                      "+91 98765 43210",
+                      facultyData?['phone'] ?? "+91 98765 43210",
                     ),
                     _buildProfileInfoRow(
                       Icons.badge_outlined,
                       "Employee ID",
-                      "FAC001",
+                      facultyData?['id'] ?? "FAC001",
                     ),
                     _buildProfileInfoRow(
                       Icons.location_on_outlined,
                       "Office",
-                      "Room 207, Building A",
+                      facultyData?['office'] ?? "Room 207, Building A",
                     ),
 
                     const SizedBox(height: 24),
@@ -171,12 +174,12 @@ class FacultyProfileScreen extends StatelessWidget {
                     _buildProfileInfoRow(
                       Icons.work_outlined,
                       "Designation",
-                      "Assistant Professor",
+                      facultyData?['designation'] ?? "Assistant Professor",
                     ),
                     _buildProfileInfoRow(
                       Icons.school_outlined,
                       "Department",
-                      "Computer Engineering",
+                      facultyData?['department'] ?? "Computer Engineering",
                     ),
                     _buildProfileInfoRow(
                       Icons.calendar_today_outlined,
@@ -285,7 +288,7 @@ class FacultyProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -314,11 +317,18 @@ class FacultyProfileScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+                
+                // Clear shared preferences
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+                
+                // Navigate to auth screen
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/',
+                  (Route<dynamic> route) => false,
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFA50C22),

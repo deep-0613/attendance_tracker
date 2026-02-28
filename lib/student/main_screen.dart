@@ -5,7 +5,9 @@ import 'wifi_scanner_screen.dart';
 import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic>? studentData;
+  
+  const MainScreen({Key? key, this.studentData}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -14,11 +16,17 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  List<Widget> _screens = [
-    const HomeScreen(),
-    const WifiScannerScreen(),
-    const StudentProfileScreen(),
-  ];
+  late List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeScreen(studentData: widget.studentData),
+      const WifiScannerScreen(),
+      StudentProfileScreen(studentData: widget.studentData),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

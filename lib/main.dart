@@ -1,4 +1,4 @@
-import 'package:attendance_tracker/student/auth_screen.dart';
+import 'package:attendance_tracker/auth_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

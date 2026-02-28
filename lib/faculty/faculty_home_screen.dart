@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'faculty_profile_screen.dart';
 
@@ -11,12 +14,14 @@ class FacultyHomeScreen extends StatefulWidget {
 
 class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
   int _currentIndex = 0;
+  Map<String, dynamic>? facultyData;
 
   late List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    _loadFacultyData();
     _screens = [
       SafeArea(
         child: SingleChildScrollView(
@@ -32,8 +37,28 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
         ),
       ),
       Container(), // Timetable content
-      const FacultyProfileScreen(),
+      FacultyProfileScreen(facultyData: facultyData),
     ];
+  }
+
+  Future<void> _loadFacultyData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId') ?? '';
+      
+      if (userId.isNotEmpty) {
+        final facultyJson = await rootBundle.loadString('assets/json/faculty.json');
+        final facultyMap = json.decode(facultyJson);
+        
+        if (facultyMap.containsKey(userId)) {
+          setState(() {
+            facultyData = facultyMap[userId];
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading faculty data: $e');
+    }
   }
 
   @override

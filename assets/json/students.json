@@ -1,0 +1,41 @@
+{
+  "FCUG23749": {
+    "password": "pass123",
+    "name": "Parth Salunke",
+    "email": "parth.salunke@somaiya.edu",
+    "phone": "+91 98765 43210",
+    "dateOfBirth": "15/08/2003",
+    "address": "Goregaon, Maharashtra",
+    "department": "Computer Engineering",
+    "year": "Third Year",
+    "division": "A",
+    "rollNumber": "23",
+    "sgpa": "8.5"
+  },
+  "FCUG23762": {
+    "password": "password123",
+    "name": "Prayag Upadhayaya",
+    "email": "prayag.u@somaiya.edu",
+    "phone": "+91 98765 43211",
+    "dateOfBirth": "10/05/2003",
+    "address": "Ghatkopar, Maharashtra",
+    "department": "Computer Engineering",
+    "year": "Third Year",
+    "division": "B",
+    "rollNumber": "15",
+    "sgpa": "8.2"
+  },
+  "FCUG23702": {
+    "password": "student123",
+    "name": "Deep Bandekar",
+    "email": "deep.bandekar@somaiya.edu",
+    "phone": "+91 98765 43212",
+    "dateOfBirth": "20/12/2003",
+    "address": "Girgaon, Maharashtra",
+    "department": "Computer Engineering",
+    "year": "Third Year",
+    "division": "A",
+    "rollNumber": "08",
+    "sgpa": "9.1"
+  }
+}

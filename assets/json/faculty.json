@@ -1,0 +1,18 @@
+{
+  "FAC001": {
+    "password": "faculty123",
+    "name": "Dr. Nitin Redkar",
+    "email": "nitin.redkar@somaiya.edu",
+    "phone": "+91 98765 43220",
+    "department": "Computer Engineering",
+    "designation": "Professor"
+  },
+  "Manjiri": {
+    "password": "teacher123",
+    "name": "Manjiri Samant",
+    "email": "manjiri.samant@somaiya.edu",
+    "phone": "+91 98765 43221",
+    "department": "Computer Engineering",
+    "designation": "Assistant Professor"
+  }
+}

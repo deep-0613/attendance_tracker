@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'timetable_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic>? studentData;
+  
+  const HomeScreen({Key? key, this.studentData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Parth Salunke",
+                            studentData?['name'] ?? "Parth Salunke",
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
