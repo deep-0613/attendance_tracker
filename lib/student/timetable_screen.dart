@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -12,13 +13,47 @@ class _TimetableScreenState extends State<TimetableScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  late Timer _clockTimer;
 
-  // 0 = MON
-  final int todayIndex = 0;
+  // Live time
+  DateTime _now = DateTime.now();
+
+  // Slot time ranges: [startHour, startMin, endHour, endMin]
+  final List<List<int>> _slotRanges = [
+    [10, 30, 11, 30],
+    [11, 30, 12, 30],
+    [-1, -1, -1, -1], // LUNCH — never active
+    [13, 15, 14, 15],
+    [14, 15, 15, 15],
+    [15, 30, 16, 30],
+    [16, 30, 17, 30],
+  ];
+
+  // Returns 0–6 index of active slot, or -1 if none
+  int get _activeSlotIndex {
+    final mins = _now.hour * 60 + _now.minute;
+    for (int i = 0; i < _slotRanges.length; i++) {
+      final r = _slotRanges[i];
+      if (r[0] == -1) continue;
+      final start = r[0] * 60 + r[1];
+      final end = r[2] * 60 + r[3];
+      if (mins >= start && mins < end) return i;
+    }
+    return -1;
+  }
+
+  // 0 = MON … 5 = SAT; -1 if Sunday or not a school day
+  int get _todayDayIndex {
+    final wd = _now.weekday; // 1=Mon … 7=Sun
+    if (wd >= 1 && wd <= 6) return wd - 1;
+    return -1;
+  }
 
   @override
   void initState() {
     super.initState();
+
+    // Pulse animation
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -27,11 +62,17 @@ class _TimetableScreenState extends State<TimetableScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
     _pulseController.repeat(reverse: true);
+
+    // Refresh every 30 seconds so the highlighted slot stays accurate
+    _clockTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _clockTimer.cancel();
     super.dispose();
   }
 
@@ -142,9 +183,18 @@ class _TimetableScreenState extends State<TimetableScreen>
     return Map<String, String>.from(details[abbr] ?? {'name': abbr, 'code': '—'});
   }
 
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  String get _todayLabel {
+    const labels = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    return labels[_now.weekday - 1];
+  }
+
   // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final todayIdx = _todayDayIndex;
+    final activeSlot = _activeSlotIndex;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F6),
 
@@ -202,50 +252,61 @@ class _TimetableScreenState extends State<TimetableScreen>
                     ],
                   ),
                 ),
-                // Today chip
+                // Today chip — shows current day name, pulses when a class is ongoing
                 AnimatedBuilder(
                   animation: _pulseAnimation,
-                  builder: (_, __) => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Color.lerp(
-                        const Color(0xFFFFF1F2),
-                        const Color(0xFFFFE4E6),
-                        _pulseAnimation.value,
+                  builder: (_, __) {
+                    final isOngoing = todayIdx != -1 && activeSlot != -1;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isOngoing
+                            ? Color.lerp(
+                                const Color(0xFFFFF1F2),
+                                const Color(0xFFFFE4E6),
+                                _pulseAnimation.value,
+                              )
+                            : const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isOngoing
+                              ? const Color(0xFFA50C22).withOpacity(0.35)
+                              : const Color(0xFFE5E7EB),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFA50C22).withOpacity(0.35),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 7,
-                          height: 7,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color.lerp(
-                              const Color(0xFFA50C22),
-                              const Color(0xFFDC2626),
-                              _pulseAnimation.value,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isOngoing
+                                  ? Color.lerp(
+                                      const Color(0xFFA50C22),
+                                      const Color(0xFFDC2626),
+                                      _pulseAnimation.value,
+                                    )
+                                  : const Color(0xFF9CA3AF),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Monday',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFA50C22),
+                          const SizedBox(width: 6),
+                          Text(
+                            _todayLabel,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isOngoing
+                                  ? const Color(0xFFA50C22)
+                                  : const Color(0xFF6B7280),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -263,11 +324,16 @@ class _TimetableScreenState extends State<TimetableScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTimeHeader(),
+                    _buildTimeHeader(activeSlot, todayIdx),
                     const SizedBox(height: 8),
                     ..._days.asMap().entries.map((entry) => Padding(
                           padding: const EdgeInsets.only(bottom: 7),
-                          child: _buildDayRow(entry.key, entry.value),
+                          child: _buildDayRow(
+                            entry.key,
+                            entry.value,
+                            todayIdx,
+                            activeSlot,
+                          ),
                         )),
                   ],
                 ),
@@ -280,34 +346,45 @@ class _TimetableScreenState extends State<TimetableScreen>
   }
 
   // ── Time header ───────────────────────────────────────────────────────────
-  Widget _buildTimeHeader() {
+  Widget _buildTimeHeader(int activeSlot, int todayIdx) {
     return Row(
       children: [
-        // spacer for day label column
         const SizedBox(width: 48),
         const SizedBox(width: 6),
         ..._timeSlots.asMap().entries.map((e) {
           final isLunch = e.key == 2;
+          // Highlight header column only when it's today AND that slot is active
+          final isActiveNow = !isLunch && e.key == activeSlot && todayIdx != -1;
+
           return Container(
             width: isLunch ? 58 : 80,
             margin: const EdgeInsets.symmetric(horizontal: 3),
             padding: const EdgeInsets.symmetric(vertical: 7),
             decoration: BoxDecoration(
-              color: isLunch
-                  ? const Color(0xFFF3F4F6)
-                  : const Color(0xFFF9FAFB),
+              color: isActiveNow
+                  ? const Color(0xFFA50C22).withOpacity(0.08)
+                  : isLunch
+                      ? const Color(0xFFF3F4F6)
+                      : const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.circular(7),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(
+                color: isActiveNow
+                    ? const Color(0xFFA50C22).withOpacity(0.5)
+                    : const Color(0xFFE5E7EB),
+                width: isActiveNow ? 1.5 : 1,
+              ),
             ),
             child: Text(
               e.value,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: isLunch ? 8 : 9,
-                fontWeight: FontWeight.w600,
-                color: isLunch
-                    ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF6B7280),
+                fontWeight: isActiveNow ? FontWeight.w700 : FontWeight.w600,
+                color: isActiveNow
+                    ? const Color(0xFFA50C22)
+                    : isLunch
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF6B7280),
                 height: 1.4,
               ),
             ),
@@ -318,8 +395,13 @@ class _TimetableScreenState extends State<TimetableScreen>
   }
 
   // ── Day row ───────────────────────────────────────────────────────────────
-  Widget _buildDayRow(int dayIndex, Map<String, dynamic> dayData) {
-    final isToday = dayIndex == todayIndex;
+  Widget _buildDayRow(
+    int dayIndex,
+    Map<String, dynamic> dayData,
+    int todayIdx,
+    int activeSlot,
+  ) {
+    final isToday = dayIndex == todayIdx;
     final subjects = dayData['subjects'] as List<Map<String, String>>;
 
     return Container(
@@ -381,6 +463,7 @@ class _TimetableScreenState extends State<TimetableScreen>
               data: e.value,
               slotIndex: e.key,
               isToday: isToday,
+              activeSlot: activeSlot,
               dayLabel: dayData['label'],
             );
           }),
@@ -394,6 +477,7 @@ class _TimetableScreenState extends State<TimetableScreen>
     required Map<String, String> data,
     required int slotIndex,
     required bool isToday,
+    required int activeSlot,
     required String dayLabel,
   }) {
     final isLunch = slotIndex == 2;
@@ -430,15 +514,14 @@ class _TimetableScreenState extends State<TimetableScreen>
       return const SizedBox(width: 80 + 6);
     }
 
-    // Ongoing = MON slot 0, IP
-    final isOngoing = dayLabel == 'MON' && slotIndex == 0;
+    // A cell is "ongoing" only if it's today's row AND it's the active slot
+    final isOngoing = isToday && slotIndex == activeSlot;
 
     return GestureDetector(
       onTap: () => _showSubjectModal(subject, faculty, room),
       child: AnimatedBuilder(
         animation: _pulseAnimation,
         builder: (_, __) {
-          // ongoing pulses between very light red tint and slightly stronger tint
           final bgColor = isOngoing
               ? Color.lerp(
                   const Color(0xFFFFF1F2),
@@ -515,6 +598,27 @@ class _TimetableScreenState extends State<TimetableScreen>
                     ),
                   ),
                 ),
+                // "NOW" badge for ongoing
+                if (isOngoing) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFA50C22),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '● NOW',
+                      style: GoogleFonts.inter(
+                        fontSize: 7,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           );
@@ -536,7 +640,6 @@ class _TimetableScreenState extends State<TimetableScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header band — matches Current Lecture card style
             Container(
               width: double.infinity,
               padding:
@@ -582,8 +685,6 @@ class _TimetableScreenState extends State<TimetableScreen>
                 ],
               ),
             ),
-
-            // Body rows — identical style to home_screen info rows
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
