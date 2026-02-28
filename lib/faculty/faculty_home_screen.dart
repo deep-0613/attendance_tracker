@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'faculty_profile_screen.dart';
 
 class FacultyHomeScreen extends StatefulWidget {
-  const FacultyHomeScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic>? facultyData;
+  
+  const FacultyHomeScreen({Key? key, this.facultyData}) : super(key: key);
 
   @override
   State<FacultyHomeScreen> createState() => _FacultyHomeScreenState();
@@ -14,14 +13,12 @@ class FacultyHomeScreen extends StatefulWidget {
 
 class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
   int _currentIndex = 0;
-  Map<String, dynamic>? facultyData;
 
   late List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
-    _loadFacultyData();
     _screens = [
       SafeArea(
         child: SingleChildScrollView(
@@ -37,28 +34,8 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
         ),
       ),
       Container(), // Timetable content
-      FacultyProfileScreen(facultyData: facultyData),
+      FacultyProfileScreen(facultyData: widget.facultyData),
     ];
-  }
-
-  Future<void> _loadFacultyData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId') ?? '';
-      
-      if (userId.isNotEmpty) {
-        final facultyJson = await rootBundle.loadString('assets/json/faculty.json');
-        final facultyMap = json.decode(facultyJson);
-        
-        if (facultyMap.containsKey(userId)) {
-          setState(() {
-            facultyData = facultyMap[userId];
-          });
-        }
-      }
-    } catch (e) {
-      print('Error loading faculty data: $e');
-    }
   }
 
   @override
@@ -98,7 +75,7 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Manjiri Samant",
+                          widget.facultyData?['name'] ?? "Manjiri Samant",
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -107,7 +84,7 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          "manjiris@somaiya.edu",
+                          widget.facultyData?['email'] ?? "manjiris@somaiya.edu",
                           style: GoogleFonts.inter(
                             color: Colors.white70,
                             fontSize: 13,

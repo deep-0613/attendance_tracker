@@ -110,22 +110,22 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     if (isAuthenticated && userData != null) {
-      // Save login state to shared preferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('userType', _isFacultyLogin ? 'faculty' : 'student');
-      await prefs.setString('userId', id);
-      
-      if (_isFacultyLogin) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const FacultyHomeScreen()),
-        );
+        // Save login state to shared preferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('userType', _isFacultyLogin ? 'faculty' : 'student');
+        await prefs.setString('userId', id);
+        
+        if (_isFacultyLogin) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => FacultyHomeScreen(facultyData: userData)),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => MainScreen(studentData: userData)),
+          );
+        }
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => MainScreen(studentData: userData)),
-        );
-      }
-    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
