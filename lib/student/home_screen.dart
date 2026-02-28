@@ -1,11 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'timetable_screen.dart';
+import 'attendance_tracker_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final Map<String, dynamic>? studentData;
   
   const HomeScreen({Key? key, this.studentData}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Map<String, dynamic>? _attendanceData;
+  double _overallPercentage = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttendanceData();
+  }
+
+  Future<void> _loadAttendanceData() async {
+    try {
+      // Get current user ID from shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('userId') ?? '';
+      
+      if (userId.isNotEmpty) {
+        // Load attendance data
+        final attendanceJson = await rootBundle.loadString('assets/json/attendance_percentage.json');
+        final attendanceMap = json.decode(attendanceJson);
+        
+        if (attendanceMap.containsKey(userId)) {
+          setState(() {
+            _attendanceData = attendanceMap[userId];
+            _overallPercentage = _attendanceData?['overallPercentage']?.toDouble() ?? 0.0;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading attendance data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            studentData?['name'] ?? "Parth Salunke",
+                            widget.studentData?['name'] ?? "Parth Salunke",
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -107,7 +148,15 @@ class HomeScreen extends StatelessWidget {
                 /// ─── ATTENDANCE TRACKER ────────────────────────────────────
                 _sectionLabel("Attendance Tracker"),
                 const SizedBox(height: 10),
-                const _AttendanceCard(),
+                GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AttendanceTrackerScreen()),
+                  );
+                },
+                child: _AttendanceCard(overallPercentage: _overallPercentage),
+              ),
 
                 const SizedBox(height: 22),
 
@@ -301,13 +350,15 @@ class _divider extends StatelessWidget {
 
 /// ── Attendance Tracker Card ───────────────────────────────────────────────
 class _AttendanceCard extends StatelessWidget {
-  const _AttendanceCard();
+  final double overallPercentage;
+  
+  const _AttendanceCard({required this.overallPercentage});
 
   @override
   Widget build(BuildContext context) {
-    const double attendance = 0.76;
-    const int present = 38;
-    const int total = 50;
+    // Calculate present and total from overall percentage (assuming 50 total lectures)
+    final int total = 50;
+    final int present = ((overallPercentage / 100) * total).round();
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -333,7 +384,7 @@ class _AttendanceCard extends StatelessWidget {
                 height: 90,
                 width: 90,
                 child: CircularProgressIndicator(
-                  value: attendance,
+                  value: overallPercentage / 100,
                   strokeWidth: 8,
                   strokeCap: StrokeCap.round,
                   backgroundColor: const Color(0xFFE5E7EB),
@@ -344,7 +395,7 @@ class _AttendanceCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "76%",
+                    "${overallPercentage.toStringAsFixed(1)}%",
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
@@ -450,7 +501,7 @@ class _AttendanceCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    value: attendance,
+                    value: overallPercentage / 100,
                     minHeight: 5,
                     backgroundColor: const Color(0xFFE5E7EB),
                     color: const Color(0xFFA50C22),

@@ -1,0 +1,209 @@
+{
+  "FCUG23749": {
+    "name": "Parth Salunke",
+    "email": "parth.salunke@somaiya.edu",
+    "overallPercentage": 76.0,
+    "subjects": {
+      "Image Processing": {
+        "totalLectures": 45,
+        "attendedLectures": 38,
+        "percentage": 84.4,
+        "color": "#10B981"
+      },
+      "Data Structures": {
+        "totalLectures": 48,
+        "attendedLectures": 35,
+        "percentage": 72.9,
+        "color": "#3B82F6"
+      },
+      "Database Management": {
+        "totalLectures": 40,
+        "attendedLectures": 32,
+        "percentage": 80.0,
+        "color": "#8B5CF6"
+      },
+      "Software Engineering": {
+        "totalLectures": 42,
+        "attendedLectures": 30,
+        "percentage": 71.4,
+        "color": "#F59E0B"
+      },
+      "Web Development": {
+        "totalLectures": 38,
+        "attendedLectures": 28,
+        "percentage": 73.7,
+        "color": "#06B6D4"
+      },
+      "Computer Networks": {
+        "totalLectures": 44,
+        "attendedLectures": 35,
+        "percentage": 79.5,
+        "color": "#EF4444"
+      }
+    },
+    "recentAttendance": [
+      {
+        "date": "2024-02-28",
+        "time": "10:30 AM",
+        "subject": "Image Processing",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-27",
+        "time": "2:00 PM",
+        "subject": "Data Structures",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-26",
+        "time": "9:00 AM",
+        "subject": "Database Management",
+        "status": "Absent"
+      },
+      {
+        "date": "2024-02-25",
+        "time": "11:30 AM",
+        "subject": "Software Engineering",
+        "status": "Present"
+      }
+    ]
+  },
+  "FCUG23762": {
+    "name": "Prayag Upadhayaya",
+    "email": "prayag.u@somaiya.edu",
+    "overallPercentage": 82.3,
+    "subjects": {
+      "Image Processing": {
+        "totalLectures": 45,
+        "attendedLectures": 42,
+        "percentage": 93.3,
+        "color": "#10B981"
+      },
+      "Data Structures": {
+        "totalLectures": 48,
+        "attendedLectures": 40,
+        "percentage": 83.3,
+        "color": "#3B82F6"
+      },
+      "Database Management": {
+        "totalLectures": 40,
+        "attendedLectures": 38,
+        "percentage": 95.0,
+        "color": "#8B5CF6"
+      },
+      "Software Engineering": {
+        "totalLectures": 42,
+        "attendedLectures": 35,
+        "percentage": 83.3,
+        "color": "#F59E0B"
+      },
+      "Web Development": {
+        "totalLectures": 38,
+        "attendedLectures": 32,
+        "percentage": 84.2,
+        "color": "#06B6D4"
+      },
+      "Computer Networks": {
+        "totalLectures": 44,
+        "attendedLectures": 41,
+        "percentage": 93.2,
+        "color": "#EF4444"
+      }
+    },
+    "recentAttendance": [
+      {
+        "date": "2024-02-28",
+        "time": "10:30 AM",
+        "subject": "Image Processing",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-27",
+        "time": "2:00 PM",
+        "subject": "Data Structures",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-26",
+        "time": "9:00 AM",
+        "subject": "Database Management",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-25",
+        "time": "11:30 AM",
+        "subject": "Software Engineering",
+        "status": "Present"
+      }
+    ]
+  },
+  "FCUG23702": {
+    "name": "Deep Bandekar",
+    "email": "deep.bandekar@somaiya.edu",
+    "overallPercentage": 89.1,
+    "subjects": {
+      "Image Processing": {
+        "totalLectures": 45,
+        "attendedLectures": 43,
+        "percentage": 95.6,
+        "color": "#10B981"
+      },
+      "Data Structures": {
+        "totalLectures": 48,
+        "attendedLectures": 45,
+        "percentage": 93.8,
+        "color": "#3B82F6"
+      },
+      "Database Management": {
+        "totalLectures": 40,
+        "attendedLectures": 39,
+        "percentage": 97.5,
+        "color": "#8B5CF6"
+      },
+      "Software Engineering": {
+        "totalLectures": 42,
+        "attendedLectures": 38,
+        "percentage": 90.5,
+        "color": "#F59E0B"
+      },
+      "Web Development": {
+        "totalLectures": 38,
+        "attendedLectures": 35,
+        "percentage": 92.1,
+        "color": "#06B6D4"
+      },
+      "Computer Networks": {
+        "totalLectures": 44,
+        "attendedLectures": 42,
+        "percentage": 95.5,
+        "color": "#EF4444"
+      }
+    },
+    "recentAttendance": [
+      {
+        "date": "2024-02-28",
+        "time": "10:30 AM",
+        "subject": "Image Processing",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-27",
+        "time": "2:00 PM",
+        "subject": "Data Structures",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-26",
+        "time": "9:00 AM",
+        "subject": "Database Management",
+        "status": "Present"
+      },
+      {
+        "date": "2024-02-25",
+        "time": "11:30 AM",
+        "subject": "Software Engineering",
+        "status": "Present"
+      }
+    ]
+  }
+}
