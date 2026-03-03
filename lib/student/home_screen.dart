@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'timetable_screen.dart';
 import 'attendance_tracker_screen.dart';
+import '../upcoming_events_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic>? studentData;
@@ -532,7 +533,14 @@ class _QuickAccessGrid extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const TimetableScreen()),
         ),
       ),
-      _QuickItem(icon: Icons.event_outlined, label: "Events", onTap: () {}),
+      _QuickItem(
+        icon: Icons.event_outlined, 
+        label: "Events", 
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const UpcomingEventsScreen()),
+        ),
+      ),
       _QuickItem(
         icon: Icons.menu_book_outlined,
         label: "Subjects",
