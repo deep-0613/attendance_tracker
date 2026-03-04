@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'event_details_screen.dart';
 
-class UpcomingEventsScreen extends StatelessWidget {
+class UpcomingEventsScreen extends StatefulWidget {
   const UpcomingEventsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<UpcomingEventsScreen> createState() => _UpcomingEventsScreenState();
+}
+
+class _UpcomingEventsScreenState extends State<UpcomingEventsScreen> {
+  // Track which cards are expanded
+  final Map<String, bool> _expandedCards = {};
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +34,7 @@ class UpcomingEventsScreen extends StatelessWidget {
               context,
               'Symphony',
               'assets/images/symphony.jpg',
-              'Annual cultural fest showcasing music, dance, and drama performances',
+              'A wonderful music event where students will get vibe with some songs',
             ),
             const SizedBox(height: 16),
             _buildEventCard(
@@ -63,39 +71,48 @@ class UpcomingEventsScreen extends StatelessWidget {
   }
 
   Widget _buildEventCard(BuildContext context, String eventName, String imagePath, String description) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventDetailsScreen(
-              eventName: eventName,
-              imagePath: imagePath,
-              description: description,
-            ),
+    final isExpanded = _expandedCards[eventName] ?? false;
+    
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            if (isExpanded) {
+              // If already expanded, navigate to full details
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventDetailsScreen(
+                    eventName: eventName,
+                    imagePath: imagePath,
+                    description: description,
+                  ),
+                ),
+              );
+            } else {
+              // First click - expand the card
+              _expandedCards[eventName] = true;
+            }
+          });
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image with overlay
-            Container(
-              height: 180,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: isExpanded ? 250 : 180,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 image: DecorationImage(
                   image: AssetImage(imagePath),
                   fit: BoxFit.cover,
@@ -106,46 +123,68 @@ class UpcomingEventsScreen extends StatelessWidget {
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.8),
                     ],
                   ),
                 ),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      eventName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16.0,
+                    right: 16.0,
+                    bottom: 16.0,
+                    top: 0.0,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Event name and description - always at bottom left
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              eventName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (isExpanded) ...[
+                              const SizedBox(height: 8),
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 300),
+                                opacity: isExpanded ? 1.0 : 0.0,
+                                child: Text(
+                                  description,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    height: 1.4,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
             ),
-            // Description
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                description,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
