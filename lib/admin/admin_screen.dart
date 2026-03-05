@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'upload_event_screen.dart';
+import 'register_student_screen.dart';
+import 'register_faculty_screen.dart';
+import 'delete_user_screen.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({Key? key}) : super(key: key);
@@ -240,7 +243,9 @@ class _AdminScreenState extends State<AdminScreen> {
                   subtitle: 'Add new student',
                   color: const Color(0xFFA50C22),
                   onTap: () {
-                    // TODO: Navigate to student registration
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const RegisterStudentScreen()),
+                    );
                   },
                 ),
                 
@@ -251,7 +256,9 @@ class _AdminScreenState extends State<AdminScreen> {
                   subtitle: 'Add new faculty',
                   color: const Color(0xFFA50C22),
                   onTap: () {
-                    // TODO: Navigate to faculty registration
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const RegisterFacultyScreen()),
+                    );
                   },
                 ),
                 
@@ -262,7 +269,9 @@ class _AdminScreenState extends State<AdminScreen> {
                   subtitle: 'Remove user',
                   color: const Color(0xFFA50C22),
                   onTap: () {
-                    // TODO: Navigate to delete user
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DeleteUserScreen()),
+                    );
                   },
                 ),
                 
