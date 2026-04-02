@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'delete_student_screen.dart';
+import 'delete_faculty_screen.dart';
 
 class DeleteUserScreen extends StatefulWidget {
   const DeleteUserScreen({Key? key}) : super(key: key);
@@ -121,7 +123,9 @@ class _DeleteUserScreenState extends State<DeleteUserScreen> {
               subtitle: 'Remove student from system',
               color: const Color(0xFF3B82F6),
               onTap: () {
-                _showDeleteStudentDialog();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DeleteStudentScreen()),
+                );
               },
             ),
             
@@ -134,7 +138,9 @@ class _DeleteUserScreenState extends State<DeleteUserScreen> {
               subtitle: 'Remove faculty from system',
               color: const Color(0xFF8B5CF6),
               onTap: () {
-                _showDeleteFacultyDialog();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DeleteFacultyScreen()),
+                );
               },
             ),
           ],
@@ -204,197 +210,6 @@ class _DeleteUserScreenState extends State<DeleteUserScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showDeleteStudentDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Delete Student',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF111827),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Are you sure you want to delete a student?',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: const Color(0xFF6B7280),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFEF4444)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Warning:',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFDC2626),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• This action cannot be undone\n• All student data will be permanently deleted\n• Attendance records will be affected\n• Student will lose access to system',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFFDC2626),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF6B7280),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showComingSoonSnackBar('Student deletion');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-              ),
-              child: Text(
-                'Delete Student',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteFacultyDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Delete Faculty',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF111827),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Are you sure you want to delete a faculty member?',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: const Color(0xFF6B7280),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFEF4444)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Warning:',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFDC2626),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• This action cannot be undone\n• All faculty data will be permanently deleted\n• Assigned lectures will be affected\n• Faculty will lose access to system',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFFDC2626),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF6B7280),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showComingSoonSnackBar('Faculty deletion');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-              ),
-              child: Text(
-                'Delete Faculty',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showComingSoonSnackBar(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$feature feature coming soon!',
-          style: GoogleFonts.inter(),
-        ),
-        backgroundColor: const Color(0xFFA50C22),
-        duration: const Duration(seconds: 3),
       ),
     );
   }
