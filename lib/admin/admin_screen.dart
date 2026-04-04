@@ -226,9 +226,9 @@ class _AdminScreenState extends State<AdminScreen> {
               children: [
                 // Course Management
                 _buildAdminCard(
-                  icon: Icons.school,
-                  title: 'Add Courses',
-                  subtitle: 'manage courses',
+                  icon: Icons.event,
+                  title: 'Courses',
+                  subtitle: 'Manage Courses',
                   color: const Color(0xFFA50C22),
                   onTap: () {
                     Navigator.of(context).push(
@@ -286,17 +286,6 @@ class _AdminScreenState extends State<AdminScreen> {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const UploadTimetableScreen()),
                     );
-                  },
-                ),
-                
-                // Send Notifications
-                _buildAdminCard(
-                  icon: Icons.notifications_active,
-                  title: 'Notifications',
-                  subtitle: 'Results, events',
-                  color: const Color(0xFFA50C22),
-                  onTap: () {
-                    // TODO: Navigate to send notifications
                   },
                 ),
               ],

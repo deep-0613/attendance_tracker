@@ -83,6 +83,8 @@ dependencies:
   http: ^1.6.0
   device_info_plus: ^12.3.0
   google_fonts: ^8.0.2 
+  syncfusion_flutter_pdfviewer:
+  flutter_pdfview:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
@@ -132,6 +134,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/json/
+    - assets/pdfs/
 
   # assets:
 

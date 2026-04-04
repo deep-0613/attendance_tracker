@@ -1,3 +1,4 @@
+import 'package:attendance_tracker/student/subjects_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
@@ -551,8 +552,12 @@ class _QuickAccessGrid extends StatelessWidget {
       _QuickItem(
         icon: Icons.menu_book_outlined,
         label: "Subjects",
-        onTap: () {},
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SubjectsScreen()),
+        ),
       ),
+      
       _QuickItem(
         icon: Icons.receipt_long_outlined,
         label: "Concession",
