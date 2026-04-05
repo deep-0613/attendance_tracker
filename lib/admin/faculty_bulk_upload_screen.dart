@@ -45,7 +45,7 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
 
       final headerStyle = CellStyle(
         bold: true,
-        backgroundColorHex: ExcelColor.fromHexString('#4A1942'),
+        backgroundColorHex: ExcelColor.fromHexString('#A50C22'),
         fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
         horizontalAlign: HorizontalAlign.Center,
       );
@@ -287,13 +287,13 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF1F3F6),
       appBar: AppBar(
         title: const Text(
           'Bulk Faculty Upload',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        backgroundColor: const Color(0xFF4A1942),
+        backgroundColor: const Color(0xFFA50C22),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -306,13 +306,13 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A1942).withOpacity(0.08),
+                  color: const Color(0xFFA50C22).withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.school_rounded,
                   size: 64,
-                  color: Color(0xFF4A1942),
+                  color: Color(0xFFA50C22), // Fix icon color to use admin theme color
                 ),
               ),
               const SizedBox(height: 24),
@@ -321,7 +321,7 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF4A1942),
+                  color: const Color(0xFFA50C22),
                 ),
               ),
               const SizedBox(height: 8),
@@ -340,7 +340,7 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
                 icon: Icons.download_rounded,
                 title: 'Download Excel Format',
                 subtitle: 'Get the template with all required columns',
-                color: const Color(0xFF4A1942),
+                color: const Color(0xFFA50C22),
                 isLoading: _isDownloading,
                 onTap: _downloadExcelFormat,
               ),
@@ -351,7 +351,7 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
                 icon: Icons.upload_file_rounded,
                 title: 'Upload Excel File',
                 subtitle: 'Select your filled Excel file to register faculty',
-                color: const Color(0xFF2E7D32),
+                color: const Color(0xFFA50C22),
                 isLoading: _isUploading,
                 onTap: _uploadExcelFile,
               ),
@@ -370,9 +370,9 @@ class _FacultyBulkUploadScreenState extends State<FacultyBulkUploadScreen> {
                           style: const TextStyle(fontSize: 11),
                         ),
                         backgroundColor:
-                            const Color(0xFF4A1942).withOpacity(0.08),
+                            const Color(0xFFA50C22).withOpacity(0.08),
                         labelStyle:
-                            const TextStyle(color: Color(0xFF4A1942)),
+                            const TextStyle(color: Color(0xFFA50C22)),
                         padding: EdgeInsets.zero,
                         materialTapTargetSize:
                             MaterialTapTargetSize.shrinkWrap,

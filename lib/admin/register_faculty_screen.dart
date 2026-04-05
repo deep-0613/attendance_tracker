@@ -279,7 +279,7 @@ class _RegisterFacultyScreenState extends State<RegisterFacultyScreen> {
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF4A1942),
+                                  backgroundColor: const Color(0xFFA50C22),
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 24,
