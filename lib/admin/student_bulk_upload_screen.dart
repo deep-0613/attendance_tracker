@@ -7,6 +7,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+// Resolve Border naming conflict
+import 'package:flutter/src/painting/box_border.dart' as flutter_border;
+
 /// Screen for bulk student upload via Excel
 class StudentBulkUploadScreen extends StatefulWidget {
   const StudentBulkUploadScreen({super.key});
@@ -22,7 +25,6 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
   bool _isDownloading = false;
   bool _isUploading = false;
 
-  // Columns matching the DB schema (excluding password_hash — set separately)
   static const List<String> _excelColumns = [
     'student_id',
     'password_hash',
@@ -45,11 +47,8 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
     try {
       final excel = Excel.createExcel();
       final sheet = excel['Students'];
-
-      // Remove default sheet created by the library
       excel.delete('Sheet1');
 
-      // Header row — bold + background
       final headerStyle = CellStyle(
         bold: true,
         backgroundColorHex: ExcelColor.fromHexString('#1E3A5F'),
@@ -63,23 +62,23 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
         );
         cell.value = TextCellValue(_excelColumns[i]);
         cell.cellStyle = headerStyle;
-        sheet.setColumnWidth(i, 20);
+        sheet.setColumnWidth(i, 22);
       }
 
-      // Sample hint row
+      // Sample hint row — matches exact format seen in DB image
       final hintValues = [
-        'STU001',
-        'hashed_password',
-        'John Doe',
-        'john@example.com',
-        '9876543210',
-        '2000-01-15',
-        '123 Main St',
-        'Computer Science',
-        '2',
-        '101',
-        '8.5',
-        'C1',
+        '1920230001', // student_id
+        'prayag@123', // password_hash
+        'Prayag Upadhyaya', // name
+        'prayag.u@somaiya.edu', // email — @somaiya.edu only
+        '93214 86739', // phone — 5digits space 5digits (+91 auto-prepended)
+        '2003-05-10', // date_of_birth
+        'Ghatkopar, Maharashtra', // address
+        'Computer Engineering', // department — fixed value
+        'SYCO', // year
+        'FCUG23762', // roll_number — text (not numeric)
+        '8.20', // sgpa — decimal preserved
+        'C3', // lab_batch — text
       ];
 
       final hintStyle = CellStyle(
@@ -91,6 +90,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
         final cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 1),
         );
+        // Store ALL hint values as TextCellValue so Excel never auto-converts
         cell.value = TextCellValue(hintValues[i]);
         cell.cellStyle = hintStyle;
       }
@@ -98,12 +98,12 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
       final fileBytes = excel.save();
       if (fileBytes == null) throw Exception('Failed to generate Excel file');
 
-      // Write to temp first, then let OS handle save destination
+      // Write to temp dir first, then trigger native Save As dialog
+      // so the user can choose to save to Google Drive, Downloads, etc.
       final tempDir = await getTemporaryDirectory();
-      await File('${tempDir.path}/student_upload_format.xlsx')
-          .writeAsBytes(fileBytes);
+      final tempPath = '${tempDir.path}/student_upload_format.xlsx';
+      await File(tempPath).writeAsBytes(fileBytes);
 
-      // saveFile shows the native "Save to..." picker (works Android 10+ & iOS)
       final savedPath = await FilePicker.saveFile(
         dialogTitle: 'Save Student Template',
         fileName: 'student_upload_format.xlsx',
@@ -124,12 +124,54 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
     }
   }
 
+  // ───────────────────────────── Validation ──────────────────────────
+
+  String? _validateRow(
+    Map<String, dynamic> data,
+    int rowIndex,
+    Set<String> seenStudentIds,
+    Set<String> seenRollNumbers,
+  ) {
+    final studentId = data['student_id']?.toString() ?? '';
+    final rollNumber = data['roll_number']?.toString() ?? '';
+    final email = data['email']?.toString() ?? '';
+    final phone = data['phone']?.toString() ?? '';
+    final department = data['department']?.toString() ?? '';
+
+    // Duplicate student_id
+    if (seenStudentIds.contains(studentId)) {
+      return 'Row $rowIndex: Duplicate student_id "$studentId"';
+    }
+
+    // Duplicate roll_number
+    if (rollNumber.isNotEmpty && seenRollNumbers.contains(rollNumber)) {
+      return 'Row $rowIndex: Duplicate roll_number "$rollNumber"';
+    }
+
+    // Email must be @somaiya.edu
+    if (!email.toLowerCase().endsWith('@somaiya.edu')) {
+      return 'Row $rowIndex: Email "$email" must be @somaiya.edu';
+    }
+
+    // Phone format: +91 XXXXX XXXXX (auto-formatted by upload parser)
+    final phoneRegex = RegExp(r'^\+91 \d{5} \d{5}$');
+    if (phone.isNotEmpty && !phoneRegex.hasMatch(phone)) {
+      return 'Row $rowIndex: Phone "$phone" must be 10 digits (e.g. 98195 66115)';
+    }
+
+    // Department must be Computer Engineering
+    if (department.toLowerCase() != 'computer engineering') {
+      return 'Row $rowIndex: Department must be "Computer Engineering"';
+    }
+
+    return null;
+  }
+
   // ───────────────────────────── Upload ──────────────────────────────
 
   Future<void> _uploadExcelFile() async {
     setState(() => _isUploading = true);
     try {
-      // 1. Pick file
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'xls'],
@@ -140,8 +182,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
         return;
       }
 
-      final filePath = result.files.single.path!;
-      final bytes = File(filePath).readAsBytesSync();
+      final bytes = File(result.files.single.path!).readAsBytesSync();
       final excel = Excel.decodeBytes(bytes);
 
       final sheet = excel.tables.values.first;
@@ -149,12 +190,10 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
 
       if (rows.isEmpty) throw Exception('Excel file is empty');
 
-      // 2. Parse header row
       final headers = rows[0]
           .map((cell) => cell?.value?.toString().trim() ?? '')
           .toList();
 
-      // 3. Validate required columns
       const required = ['student_id', 'name', 'email'];
       for (final col in required) {
         if (!headers.contains(col)) {
@@ -162,44 +201,67 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
         }
       }
 
-      // 4. Send each data row to API
       int successCount = 0;
       int failCount = 0;
       final List<String> errors = [];
 
+      final Set<String> seenStudentIds = {};
+      final Set<String> seenRollNumbers = {};
+
       for (int i = 1; i < rows.length; i++) {
         final row = rows[i];
 
-        // Skip completely empty rows
         if (row.every((cell) =>
-            cell == null || cell.value == null || cell.value.toString().isEmpty)) {
+            cell == null ||
+            cell.value == null ||
+            cell.value.toString().isEmpty)) {
           continue;
         }
 
         final Map<String, dynamic> studentData = {};
+
         for (int j = 0; j < headers.length && j < row.length; j++) {
           var key = headers[j];
           if (key.isEmpty) continue;
 
-          // Remap Excel column name to what the API expects.
           if (key == 'password_hash') key = 'password';
 
           final cellValue = row[j]?.value;
           if (cellValue == null) continue;
 
           String value;
-          if (key == 'sgpa') {
-            // sgpa: keep decimals exactly as entered
+
+          if (key == 'sgpa' || key == 'phone') {
+            // Preserve exact string — no numeric conversion
             value = cellValue.toString().trim();
+            // Normalize phone: strip all spaces, then auto-prepend +91
+            if (key == 'phone' && value.isNotEmpty) {
+              // If Excel read it as a double (e.g. 9819566115.0), convert to int first
+              if (cellValue is DoubleCellValue) {
+                value = cellValue.value.toInt().toString();
+              } else if (cellValue is IntCellValue) {
+                value = cellValue.value.toString();
+              }
+              // Remove any existing +91 or 0 prefix and all spaces
+              value = value.replaceAll(' ', '').replaceAll('+91', '').replaceAll(RegExp(r'^0'), '');
+              // value is now a clean 10-digit string e.g. "9819566115"
+              // Format as +91 XXXXX XXXXX
+              if (value.length == 10) {
+                value = '+91 ${value.substring(0, 5)} ${value.substring(5)}';
+              }
+            }
           } else {
-            // All other columns: never allow decimal conversion.
-            // If Excel parsed the cell as a double, convert to int first
-            // so "9876543210.0" becomes "9876543210", not a rounded float.
+            // For all other columns avoid decimal representation.
+            // DoubleCellValue happens when Excel auto-reads a number cell.
+            // We convert to int first to strip the ".0" cleanly.
+            // TextCellValue (lab_batch, roll_number, name, etc.) comes
+            // through toString() unchanged — this is the lab_batch fix.
             if (cellValue is DoubleCellValue) {
               value = cellValue.value.toInt().toString();
             } else if (cellValue is IntCellValue) {
               value = cellValue.value.toString();
             } else {
+              // TextCellValue, SharedStringCellValue — use raw string
               value = cellValue.toString().trim();
             }
           }
@@ -207,6 +269,25 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
           if (value.isNotEmpty) {
             studentData[key] = value;
           }
+        }
+
+        // Client-side validation before hitting API
+        final validationError = _validateRow(
+          studentData,
+          i + 1,
+          seenStudentIds,
+          seenRollNumbers,
+        );
+
+        if (validationError != null) {
+          failCount++;
+          errors.add(validationError);
+          continue;
+        }
+
+        seenStudentIds.add(studentData['student_id'].toString());
+        if (studentData.containsKey('roll_number')) {
+          seenRollNumbers.add(studentData['roll_number'].toString());
         }
 
         try {
@@ -250,11 +331,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
     );
   }
 
-  void _showUploadResultDialog(
-    int success,
-    int fail,
-    List<String> errors,
-  ) {
+  void _showUploadResultDialog(int success, int fail, List<String> errors) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -285,7 +362,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
                 ),
                 const SizedBox(height: 4),
                 SizedBox(
-                  height: 120,
+                  height: 150,
                   child: SingleChildScrollView(
                     child: Text(
                       errors.join('\n'),
@@ -348,7 +425,6 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Header illustration / icon
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -380,9 +456,46 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 16),
 
-              // ── Download Button ──
+              // Validation rules info card
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: flutter_border.Border.all(color: Colors.amber.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline,
+                            size: 16, color: Colors.amber.shade800),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Format Rules',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.amber.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _ruleItem('Department must be "Computer Engineering"'),
+                    _ruleItem('Email must end with @somaiya.edu'),
+                    _ruleItem('Phone: enter 10 digits only (e.g. 98195 66115), +91 added automatically'),
+                    _ruleItem('student_id must be unique'),
+                    _ruleItem('roll_number must be unique'),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               _ActionCard(
                 icon: Icons.download_rounded,
                 title: 'Download Excel Format',
@@ -394,7 +507,6 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
 
               const SizedBox(height: 16),
 
-              // ── Upload Button ──
               _ActionCard(
                 icon: Icons.upload_file_rounded,
                 title: 'Upload Excel File',
@@ -406,7 +518,6 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
 
               const SizedBox(height: 32),
 
-              // Column info chip strip
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -437,6 +548,21 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _ruleItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 12)),
+          Expanded(
+            child: Text(text, style: const TextStyle(fontSize: 12)),
+          ),
+        ],
       ),
     );
   }
