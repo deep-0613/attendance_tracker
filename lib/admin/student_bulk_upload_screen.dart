@@ -51,7 +51,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
 
       final headerStyle = CellStyle(
         bold: true,
-        backgroundColorHex: ExcelColor.fromHexString('#1E3A5F'),
+        backgroundColorHex: ExcelColor.fromHexString('#A50C22'),
         fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
         horizontalAlign: HorizontalAlign.Center,
       );
@@ -412,13 +412,13 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: const Text(
           'Bulk Student Upload',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        backgroundColor: const Color(0xFF1E3A5F),
+        backgroundColor: const Color(0xFFA50C22),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -431,13 +431,13 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A5F).withOpacity(0.08),
+                  color: const Color(0xFFA50C22).withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.table_chart_rounded,
                   size: 64,
-                  color: Color(0xFF1E3A5F),
+                  color: Color(0xFFA50C22),
                 ),
               ),
               const SizedBox(height: 24),
@@ -446,7 +446,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F),
+                  color: Color(0xFFA50C22),
                 ),
               ),
               const SizedBox(height: 8),
@@ -459,51 +459,13 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Validation rules info card
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: flutter_border.Border.all(color: Colors.amber.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.info_outline,
-                            size: 16, color: Colors.amber.shade800),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Format Rules',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.amber.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _ruleItem('Department must be "Computer Engineering"'),
-                    _ruleItem('Email must end with @somaiya.edu'),
-                    _ruleItem('Phone: enter 10 digits only (e.g. 98195 66115), +91 added automatically'),
-                    _ruleItem('student_id must be unique'),
-                    _ruleItem('roll_number must be unique'),
-                  ],
-                ),
-              ),
-
               const SizedBox(height: 24),
 
               _ActionCard(
                 icon: Icons.download_rounded,
                 title: 'Download Excel Format',
                 subtitle: 'Get the template with all required columns',
-                color: const Color(0xFF1E3A5F),
+                color: const Color(0xFFA50C22),
                 isLoading: _isDownloading,
                 onTap: _downloadExcelFormat,
               ),
@@ -514,7 +476,7 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
                 icon: Icons.upload_file_rounded,
                 title: 'Upload Excel File',
                 subtitle: 'Select your filled Excel file to register students',
-                color: const Color(0xFF2E7D32),
+                color: const Color(0xFFA50C22),
                 isLoading: _isUploading,
                 onTap: _uploadExcelFile,
               ),
@@ -533,9 +495,9 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
                           style: const TextStyle(fontSize: 11),
                         ),
                         backgroundColor:
-                            const Color(0xFF1E3A5F).withOpacity(0.08),
+                            const Color(0xFFA50C22).withOpacity(0.08),
                         labelStyle:
-                            const TextStyle(color: Color(0xFF1E3A5F)),
+                            const TextStyle(color: Color(0xFFA50C22)),
                         padding: EdgeInsets.zero,
                         materialTapTargetSize:
                             MaterialTapTargetSize.shrinkWrap,
@@ -551,21 +513,6 @@ class _StudentBulkUploadScreenState extends State<StudentBulkUploadScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _ruleItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 3),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('• ', style: TextStyle(fontSize: 12)),
-          Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 12)),
-          ),
-        ],
       ),
     );
   }
