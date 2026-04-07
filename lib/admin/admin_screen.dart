@@ -1,11 +1,11 @@
-import 'package:attendance_tracker/admin/timetable_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'upload_event_screen.dart';
+import 'course_management_screen.dart';
 import 'register_student_screen.dart';
 import 'register_faculty_screen.dart';
 import 'delete_user_screen.dart';
+import 'upload_timetable_screen.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({Key? key}) : super(key: key);
@@ -224,15 +224,15 @@ class _AdminScreenState extends State<AdminScreen> {
               mainAxisSpacing: 12,
               childAspectRatio: 1.2,
               children: [
-                // Upload Event/Workshops
+                // Course Management
                 _buildAdminCard(
                   icon: Icons.event,
-                  title: 'Upload Events',
-                  subtitle: 'workshops & events',
+                  title: 'Courses',
+                  subtitle: 'Manage Courses',
                   color: const Color(0xFFA50C22),
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const UploadEventScreen()),
+                      MaterialPageRoute(builder: (_) => const CourseManagementScreen()),
                     );
                   },
                 ),
@@ -284,19 +284,8 @@ class _AdminScreenState extends State<AdminScreen> {
                   color: const Color(0xFFA50C22),
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const TimetableMakerScreen()),
+                      MaterialPageRoute(builder: (_) => const UploadTimetableScreen()),
                     );
-                  },
-                ),
-                
-                // Send Notifications
-                _buildAdminCard(
-                  icon: Icons.notifications_active,
-                  title: 'Notifications',
-                  subtitle: 'Results, events',
-                  color: const Color(0xFFA50C22),
-                  onTap: () {
-                    // TODO: Navigate to send notifications
                   },
                 ),
               ],
