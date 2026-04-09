@@ -422,7 +422,7 @@ class _SubstitutionRequestsScreenState
                               ),
                             ],
                           ),
-                          if (request['status'] == 'pending') ...[
+                          if (request['status'] == 'pending' || request['status'] == 'PENDING') ...[
                             const SizedBox(height: 16),
                             Row(
                               children: [
@@ -487,10 +487,13 @@ class _SubstitutionRequestsScreenState
   Color _getStatusColor(String? status) {
     switch (status) {
       case 'pending':
+      case 'PENDING':
         return Colors.orange;
       case 'accepted':
+      case 'ACCEPTED':
         return Colors.green;
       case 'rejected':
+      case 'REJECTED':
         return Colors.red;
       default:
         return Colors.grey;
