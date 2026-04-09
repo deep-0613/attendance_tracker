@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:intl/intl.dart';
 import 'faculty_profile_screen.dart';
 import 'timetable_screen.dart';
 import 'post_announcement_screen.dart';
@@ -458,12 +459,12 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
 
           // Check if this is the current lecture (in progress)
           if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
-            currentLecture = lecture as Map<String, dynamic>;
+            currentLecture = lecture;
             print('📚 [LECTURE] → Found current lecture: $courseName');
           }
           // Check if this is the next lecture (hasn't started yet)
           else if (currentMinutes < startMinutes && nextLecture == null) {
-            nextLecture = lecture as Map<String, dynamic>;
+            nextLecture = lecture;
             print('📚 [LECTURE] → Found next lecture: $courseName');
             break; // Found the next lecture, no need to check further
           }
@@ -1245,11 +1246,37 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
     final endTime = lecture['end_time'] ?? '';
     final sessionType = lecture['session_type'] ?? '';
 
+    // Extract dynamic timetable_id from lecture data
+    final timetableId = lecture['timetable_id'] ?? 
+                       lecture['id'] ?? 
+                       lecture['timetable_entry_id'];
+    
+    // Extract actual lecture date from lecture data
+    final lectureDate = lecture['date'] ?? 
+                      DateFormat('yyyy-MM-dd').format(DateTime.now());
+
     print('📋 [SUBSTITUTION] Creating substitution request:');
     print('📋 [SUBSTITUTION] Course: $courseName');
     print('📋 [SUBSTITUTION] Room: $room');
     print('📋 [SUBSTITUTION] Time: $startTime - $endTime');
     print('📋 [SUBSTITUTION] Type: $sessionType');
+    print('📋 [SUBSTITUTION] Timetable ID: $timetableId');
+    print('📋 [SUBSTITUTION] Lecture Date: $lectureDate');
+
+    // Validate required data
+    if (timetableId == null) {
+      print('❌ [SUBSTITUTION] No timetable_id found in lecture data');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Lecture data incomplete - missing timetable ID",
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     try {
       // Get current faculty ID
@@ -1267,10 +1294,9 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'timetable_id':
-              10, // This should come from your actual timetable data
+          'timetable_id': timetableId,
           'original_faculty_id': facultyId,
-          'date': DateTime.now().toString().split(' ')[0], // Current date
+          'date': lectureDate,
         }),
       );
 
