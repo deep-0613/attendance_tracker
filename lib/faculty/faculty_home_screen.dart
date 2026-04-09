@@ -470,13 +470,23 @@ class _FacultyHomeScreenState extends State<FacultyHomeScreen> {
           }
         }
 
-        // If current lecture exists and is assigned/taken, show the next lecture
-        if (currentLecture != null && _isAssigned) {
+        // Check if current lecture is assigned to someone else
+        bool isCurrentLectureAssigned = false;
+        if (currentLecture != null) {
+          final currentLectureId = currentLecture['timetable_id'] ?? currentLecture['id'];
+          isCurrentLectureAssigned = _acceptedLectures.any((accepted) => 
+            (accepted['timetable_id'] == currentLectureId || accepted['id'] == currentLectureId) &&
+            accepted['original_faculty_id'] == currentLecture?['faculty_id']
+          );
+        }
+
+        // If current lecture exists and is assigned to someone else, show the next lecture
+        if (currentLecture != null && isCurrentLectureAssigned) {
           print(
-            '📚 [LECTURE] Current lecture is assigned/taken, showing next lecture',
+            '📚 [LECTURE] Current lecture is assigned to someone else, showing next lecture',
           );
           // nextLecture is already set from the loop above
-        } else if (currentLecture != null && !_isAssigned) {
+        } else if (currentLecture != null && !isCurrentLectureAssigned) {
           print('📚 [LECTURE] Current lecture is available, showing current');
           nextLecture = currentLecture; // Show current lecture if not assigned
         } else {
